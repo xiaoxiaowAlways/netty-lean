@@ -1,0 +1,4 @@
+logging:
+  pattern:
+    level: info
+  level: info

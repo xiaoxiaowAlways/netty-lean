@@ -38,21 +38,21 @@ public class NettyClient {
 
     Bootstrap bootstrap = new Bootstrap();
     bootstrap
-        .group(workerGroup)
-        .channel(NioSocketChannel.class)
-        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-        .option(ChannelOption.SO_KEEPALIVE, true)
-        .option(ChannelOption.TCP_NODELAY, true)
-        .handler(new ChannelInitializer<SocketChannel>() {
-          @Override
-          public void initChannel(SocketChannel ch) {
-            ch.pipeline().addLast(new Spliter());
-            ch.pipeline().addLast(new PacketDecoder());
-            ch.pipeline().addLast(new LoginResponseHandler());
-            ch.pipeline().addLast(new MessageResponseHandler());
-            ch.pipeline().addLast(new PacketEncoder());
-          }
-        });
+      .group(workerGroup)
+      .channel(NioSocketChannel.class)
+      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+      .option(ChannelOption.SO_KEEPALIVE, true)
+      .option(ChannelOption.TCP_NODELAY, true)
+      .handler(new ChannelInitializer<SocketChannel>() {
+        @Override
+        public void initChannel(SocketChannel ch) {
+          ch.pipeline().addLast(new Spliter());
+          ch.pipeline().addLast(new PacketDecoder());
+          ch.pipeline().addLast(new LoginResponseHandler());
+          ch.pipeline().addLast(new MessageResponseHandler());
+          ch.pipeline().addLast(new PacketEncoder());
+        }
+      });
 
     connect(bootstrap, HOST, PORT, MAX_RETRY);
   }

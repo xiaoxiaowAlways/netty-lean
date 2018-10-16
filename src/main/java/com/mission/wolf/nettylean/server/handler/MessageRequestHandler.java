@@ -28,7 +28,7 @@ public class MessageRequestHandler extends SimpleChannelInboundHandler<MessageRe
     response.setFromUserName(session.getUserName());
     response.setMessage(msg.getMessage());
 
-    Channel toUserChannel = SessionUtil.getChannel(session.getUserId());
+    Channel toUserChannel = SessionUtil.getChannel(msg.getToUserId());
 
     if (toUserChannel != null && SessionUtil.hasLogin(toUserChannel)) {
       toUserChannel.writeAndFlush(response);

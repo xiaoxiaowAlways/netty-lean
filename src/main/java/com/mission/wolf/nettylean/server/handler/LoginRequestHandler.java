@@ -21,23 +21,23 @@ public class LoginRequestHandler extends SimpleChannelInboundHandler<LoginReques
   protected void channelRead0(ChannelHandlerContext ctx, LoginRequestPacket msg) throws Exception {
     System.out.println(new Date() + ": 收到客户端登录请求……");
 
-    LoginResponsePacket request = new LoginResponsePacket();
-    request.setVersion(msg.getVersion());
-    request.setUserName(msg.getUserName());
+    LoginResponsePacket response = new LoginResponsePacket();
+    response.setVersion(msg.getVersion());
+    response.setUserName(msg.getUserName());
 
     if (valid(msg)) {
-      request.setSuccess(true);
+      response.setSuccess(true);
       String userId = randomUserId();
-      request.setUserId(userId);
-      System.out.println("[" + request.getUserName() + ": " + userId + "]登录成功");
-      SessionUtil.bindSession(new Session(userId, request.getUserName()), ctx.channel());
+      response.setUserId(userId);
+      System.out.println("[" + response.getUserName() + ": " + userId + "]登录成功");
+      SessionUtil.bindSession(new Session(userId, response.getUserName()), ctx.channel());
     } else {
-      request.setReason("账号密码校验失败");
-      request.setSuccess(false);
+      response.setReason("账号密码校验失败");
+      response.setSuccess(false);
       System.out.println(new Date() + ": 登录失败!");
     }
 
-    ctx.channel().writeAndFlush(request);
+    ctx.channel().writeAndFlush(response);
   }
 
   private boolean valid(LoginRequestPacket loginRequestPacket) {

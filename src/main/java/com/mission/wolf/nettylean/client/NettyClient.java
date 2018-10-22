@@ -1,12 +1,12 @@
 package com.mission.wolf.nettylean.client;
 
-import com.mission.wolf.nettylean.client.handler.LoginResponseHandler;
-import com.mission.wolf.nettylean.client.handler.MessageResponseHandler;
+import com.mission.wolf.nettylean.client.console.ConsoleCommandManager;
+import com.mission.wolf.nettylean.client.console.LoginConsoleCommand;
+import com.mission.wolf.nettylean.client.handler.*;
+import com.mission.wolf.nettylean.codec.PacketCodecHandler;
 import com.mission.wolf.nettylean.codec.PacketDecoder;
 import com.mission.wolf.nettylean.codec.PacketEncoder;
 import com.mission.wolf.nettylean.codec.Spliter;
-import com.mission.wolf.nettylean.protocol.request.LoginRequestPacket;
-import com.mission.wolf.nettylean.protocol.request.MessageRequestPacket;
 import com.mission.wolf.nettylean.util.SessionUtil;
 
 import java.util.Date;
@@ -38,21 +38,25 @@ public class NettyClient {
 
     Bootstrap bootstrap = new Bootstrap();
     bootstrap
-      .group(workerGroup)
-      .channel(NioSocketChannel.class)
-      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-      .option(ChannelOption.SO_KEEPALIVE, true)
-      .option(ChannelOption.TCP_NODELAY, true)
-      .handler(new ChannelInitializer<SocketChannel>() {
-        @Override
-        public void initChannel(SocketChannel ch) {
-          ch.pipeline().addLast(new Spliter());
-          ch.pipeline().addLast(new PacketDecoder());
-          ch.pipeline().addLast(new LoginResponseHandler());
-          ch.pipeline().addLast(new MessageResponseHandler());
-          ch.pipeline().addLast(new PacketEncoder());
-        }
-      });
+        .group(workerGroup)
+        .channel(NioSocketChannel.class)
+        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+        .option(ChannelOption.SO_KEEPALIVE, true)
+        .option(ChannelOption.TCP_NODELAY, true)
+        .handler(new ChannelInitializer<SocketChannel>() {
+          @Override
+          public void initChannel(SocketChannel ch) {
+            ch.pipeline().addLast(new Spliter());
+            ch.pipeline().addLast(PacketCodecHandler.INSTANCE);
+            ch.pipeline().addLast(new LoginResponseHandler());
+            ch.pipeline().addLast(new MessageResponseHandler());
+            ch.pipeline().addLast(new CreateGroupResponseHandler());
+            ch.pipeline().addLast(new JoinGroupRespHandler());
+            ch.pipeline().addLast(new QuitGroupResponseHandler());
+            ch.pipeline().addLast(new ListGroupMemberRespHandler());
+            ch.pipeline().addLast(new GroupMessageRespHandler());
+          }
+        });
 
     connect(bootstrap, HOST, PORT, MAX_RETRY);
   }
@@ -78,34 +82,19 @@ public class NettyClient {
 
   private static void startConsoleThread(Channel channel) {
     Scanner sc = new Scanner(System.in);
-    LoginRequestPacket loginRequest = new LoginRequestPacket();
+    ConsoleCommandManager manager = new ConsoleCommandManager();
+    LoginConsoleCommand login = new LoginConsoleCommand();
 
     new Thread(() -> {
       while (!Thread.interrupted()) {
         if (!SessionUtil.hasLogin(channel)) {
-          System.out.print("输入用户名登录: ");
-          String username = sc.nextLine();
-          loginRequest.setUserName(username);
-
-          // 密码使用默认的
-          loginRequest.setUserPass("pwd");
-
-          // 发送登录数据包
-          channel.writeAndFlush(loginRequest);
-          waitForLoginResponse();
+          login.exec(sc, channel);
         } else {
-          String toUserId = sc.next();
-          String message = sc.next();
-          channel.writeAndFlush(new MessageRequestPacket(toUserId, message));
+          manager.exec(sc, channel);
         }
       }
     }).start();
   }
 
-  private static void waitForLoginResponse() {
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException ignored) {
-    }
-  }
+
 }

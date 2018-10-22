@@ -10,6 +10,7 @@ import java.util.Date;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -18,7 +19,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @Date: 2018/10/16 14:02
  * @Description:
  */
+@ChannelHandler.Sharable
 public class MessageRequestHandler extends SimpleChannelInboundHandler<MessageRequestPacket> {
+  public static final MessageRequestHandler INSTANCE = new MessageRequestHandler();
+
+  private MessageRequestHandler() {
+  }
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, MessageRequestPacket msg) throws Exception {
     Session session = SessionUtil.getSession(ctx.channel());
@@ -33,7 +39,7 @@ public class MessageRequestHandler extends SimpleChannelInboundHandler<MessageRe
     if (toUserChannel != null && SessionUtil.hasLogin(toUserChannel)) {
       toUserChannel.writeAndFlush(response);
     } else {
-      System.err.println("[" + session.getUserId() + "] 不在线，发送失败!");
+      System.err.println("[" + msg.getToUserId() + "] 不在线，发送失败!");
     }
   }
 }

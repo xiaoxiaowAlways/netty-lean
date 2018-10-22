@@ -1,12 +1,10 @@
 package com.mission.wolf.nettylean.server;
 
+import com.mission.wolf.nettylean.codec.PacketCodecHandler;
 import com.mission.wolf.nettylean.codec.PacketDecoder;
 import com.mission.wolf.nettylean.codec.PacketEncoder;
 import com.mission.wolf.nettylean.codec.Spliter;
-import com.mission.wolf.nettylean.server.handler.AuthHandler;
-import com.mission.wolf.nettylean.server.handler.LifeCyCleTestHandler;
-import com.mission.wolf.nettylean.server.handler.LoginRequestHandler;
-import com.mission.wolf.nettylean.server.handler.MessageRequestHandler;
+import com.mission.wolf.nettylean.server.handler.*;
 
 import java.util.Date;
 
@@ -40,12 +38,10 @@ public class NettyServer {
           protected void initChannel(NioSocketChannel ch) {
 //            ch.pipeline().addLast(new LifeCyCleTestHandler());
             ch.pipeline().addLast(new Spliter());
-            ch.pipeline().addLast(new PacketDecoder());
-            ch.pipeline().addLast(new LoginRequestHandler());
-            ch.pipeline().addLast(new AuthHandler());
-            ch.pipeline().addLast(new MessageRequestHandler());
-            ch.pipeline().addLast(new PacketEncoder());
-
+            ch.pipeline().addLast(PacketCodecHandler.INSTANCE);
+            ch.pipeline().addLast(LoginRequestHandler.INSTANCE);
+            ch.pipeline().addLast(AuthHandler.INSTANCE);
+            ch.pipeline().addLast(IMHandler.INSTANCE);
           }
         });
     bind(serverBootstrap, PORT);

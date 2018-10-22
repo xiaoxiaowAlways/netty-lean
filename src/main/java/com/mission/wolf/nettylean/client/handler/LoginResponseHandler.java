@@ -1,11 +1,8 @@
 package com.mission.wolf.nettylean.client.handler;
 
-import com.mission.wolf.nettylean.protocol.request.LoginRequestPacket;
 import com.mission.wolf.nettylean.protocol.response.LoginResponsePacket;
 import com.mission.wolf.nettylean.session.Session;
 import com.mission.wolf.nettylean.util.SessionUtil;
-
-import java.util.UUID;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -16,7 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @Description:
  */
 public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginResponsePacket> {
-//  @Override
+  //  @Override
 //  public void channelActive(ChannelHandlerContext ctx) throws Exception {
 //    // 创建登录对象
 //    LoginRequestPacket loginRequestPacket = new LoginRequestPacket();
